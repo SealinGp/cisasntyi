@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./apple >> apple.log 2>&1 &
+./cisasntyi >> cisasntyi.log 2>&1 &

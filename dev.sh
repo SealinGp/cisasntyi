@@ -1,4 +1,4 @@
 #/bin/bash
 
 go build . 
-./apple -c app_dev.yml
+./cisasntyi -c app_dev.yml
