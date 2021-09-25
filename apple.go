@@ -14,7 +14,6 @@ import (
 
 const (
 	SearchUrl = "https://www.apple.com.cn/shop/fulfillment-messages"
-	NotifyUrl = "https://api.day.app/awggZ9FrwDxq4hCq2uQXUB/这里改成你自己的推送内容"
 )
 
 type Apple struct {
