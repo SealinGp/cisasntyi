@@ -1,0 +1,13 @@
+
+#查询间隔 单位:s
+searchInterval: 30
+
+#线下店地址区域
+location: "广东 深圳 南山区"
+
+#手机型号, 通过访问官网,选择机型 可在uri中得到 比如 MLE93CH/A (iphone 13 512GB 粉色)
+modals: ["MLDW3CH/A","MLDV3CH/A"]
+
+
+#推送url 需要下载Bark app 在ios可得到 https://api.day.app/xxx
+notifyUrl: ["https://api.day.app/xxx"]
