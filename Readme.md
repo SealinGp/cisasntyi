@@ -22,6 +22,6 @@ scp ./cisasntyi.tar.gz user@yourPrivateServerIp:/home
 
 #run in your server
 ssh -t user@ip cd /home
-mkdir cisasntyi && mv cisasntyi.tar.gz cisasntyi && cd cisasntyi
+mkdir cisasntyi && mv cisasntyi.tar.gz cisasntyi && cd cisasntyi && tar -xvzf cisasntyi.tar.gz
 bash start.sh
 ```
