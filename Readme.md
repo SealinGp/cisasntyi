@@ -18,10 +18,10 @@ bash dev.sh
 bash build.sh
 
 #upload to your server
-scp ./apple.tar.gz user@yourPrivateServerIp:/home
+scp ./cisasntyi.tar.gz user@yourPrivateServerIp:/home
 
 #run in your server
 ssh -t user@ip cd /home
-mkdir apple && mv apple.tar.gz apple && cd apple
+mkdir cisasntyi && mv cisasntyi.tar.gz cisasntyi && cd cisasntyi
 bash start.sh
 ```
