@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./cisasntyi >> cisasntyi.log 2>&1 &
+./cisasntyi-binary >> cisasntyi.log 2>&1 &

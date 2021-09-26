@@ -51,6 +51,7 @@ func (apple *Apple) Serve() {
 	}
 }
 func (apple *Apple) ReqSearch() {
+	log.Printf("[I] 开始查询苹果接口. 查询位置:%v", apple.configOption.Location)
 	appleUrl := apple.makeUrl()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -80,13 +81,14 @@ func (apple *Apple) ReqSearch() {
 	for _, store := range stores {
 
 		for _, info := range store.PartsAvailability {
-			if !apple.hasStockOffline(info.PickupSearchQuote) {
-				continue
-			}
-
 			iphoneModal := info.StorePickupProductTitle
 			pickTime := info.PickupSearchQuote
 			pickStore := store.StoreName
+
+			if !apple.hasStockOffline(info.PickupSearchQuote) {
+				log.Printf("[E] 型号:%v 地点:%v %v", iphoneModal, pickStore, pickTime)
+				continue
+			}
 
 			msg := &Message{
 				Title:   iphoneModal,
@@ -97,10 +99,14 @@ func (apple *Apple) ReqSearch() {
 		}
 	}
 
+	apple.sendNotificationToBarkApp(messages)
+}
+
+func (apple *Apple) sendNotificationToBarkApp(messages []*Message) {
 	for _, msg := range messages {
 		for _, notifyUrl := range apple.configOption.NotifyUrl {
 			url := fmt.Sprintf("%v/%v/%v", notifyUrl, msg.Title, msg.Content)
-			_, err = apple.cli.Get(url)
+			_, err := apple.cli.Get(url)
 			if err != nil {
 				log.Printf("[E] send stock message failed. err:%v", err)
 			}
