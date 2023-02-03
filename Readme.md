@@ -13,7 +13,7 @@ bash dev.sh
 ### run in your private server
 
 ```bash
-#build it
+#build it or get it from release
 bash build.sh
 
 #upload to your server
@@ -21,8 +21,9 @@ scp ./cisasntyi.tar.gz user@yourPrivateServerIp:/home
 
 #run in your server
 ssh -t user@ip cd /home
-tar -xvzf cisasntyi.tar.gz && cd cisasntyi && bash start.sh
+tar -xvzf cisasntyi-linux-amd64.tar.gz && cd cisasntyi && bash start.sh
 ```
 
-### screen shot
+### screen shot demo
+
 ![alt 属性文本](./example.jpeg)

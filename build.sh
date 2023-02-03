@@ -1,7 +1,7 @@
 #!/bin/bash
 
 go mod tidy
-go build -x -o cisasntyi-binary .
+GOOS=linux GOARCH=amd64 go build -o cisasntyi-binary .
 
 if [ -d "cisasntyi" ]; then
   rm -rf cisasntyi
@@ -17,4 +17,4 @@ fi
 cp app_dev.yml cisasntyi
 cp start.sh cisasntyi
 
-tar -cvzf cisasntyi.tar.gz cisasntyi && rm -rf cisasntyi
+tar -cvzf cisasntyi-linux-amd64.tar.gz cisasntyi && rm -rf cisasntyi
