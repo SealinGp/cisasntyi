@@ -50,9 +50,13 @@ func (apple *Apple) Serve() {
 		timer = time.NewTimer(time.Duration(apple.configOption.SearchInterval) * time.Second)
 	}
 }
-func (apple *Apple) ReqSearch() {
+func (apple *Apple) ReqSearch() error {
 	log.Printf("[I] 开始查询苹果接口. 查询位置:%v", apple.configOption.Location)
-	appleUrl := apple.makeUrl()
+	appleUrl, err := apple.makeUrl()
+	if err != nil {
+		log.Printf("[E] make url failed. err:%v", err)
+		return err
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -61,11 +65,12 @@ func (apple *Apple) ReqSearch() {
 	if err != nil {
 		log.Printf("[E] new request failed. err:%v", err)
 	}
+	req.Header.Add("sec-fetch-site", "same-origin")
 
 	resp, err := apple.cli.Do(req)
 	if err != nil {
 		log.Printf("[E] do request failed. url:%v, err:%v", appleUrl, err)
-		return
+		return nil
 	}
 
 	defer resp.Body.Close()
@@ -73,37 +78,63 @@ func (apple *Apple) ReqSearch() {
 	searchResponse, err := apple.unMarshalResp(resp)
 	if err != nil {
 		log.Printf("[E] unMarshalResp failed. err:%v", err)
-		return
+		return nil
 	}
 
-	messages := make([]*Message, 0, 10)
+	pickupQuote2IphoneModels := make(map[string][]string)
 	stores := searchResponse.Body.Content.PickupMessage.Stores
 	for _, store := range stores {
-
 		for _, info := range store.PartsAvailability {
-			iphoneModal := info.StorePickupProductTitle
-			pickTime := info.PickupSearchQuote
+			msgTypes := info.MessageTypes
+			pickupQuote := info.PickupSearchQuote
 			pickStore := store.StoreName
+			iphoneModal := msgTypes.Expanded.StorePickupProductTitle
+			if iphoneModal == "" {
+				iphoneModal = msgTypes.Regular.StorePickupProductTitle
+			}
 
+			log.Printf("[I] 型号:%+v 地点:%v %v", iphoneModal, pickStore, pickupQuote)
 			if !apple.hasStockOffline(info.PickupSearchQuote) {
-				log.Printf("[E] 型号:%v 地点:%v %v", iphoneModal, pickStore, pickTime)
 				continue
 			}
 
-			msg := &Message{
-				Title:   iphoneModal,
-				Content: fmt.Sprintf("取货时间:%v 地点:%v", pickTime, pickStore),
-			}
+			pickupContent := fmt.Sprintf("%v %v", pickStore, pickupQuote)
 
-			messages = append(messages, msg)
+			iphoneModals, ok := pickupQuote2IphoneModels[pickupContent]
+			if !ok {
+				iphoneModals = make([]string, 0)
+			}
+			iphoneModals = append(iphoneModals, iphoneModal)
+			pickupQuote2IphoneModels[pickupContent] = iphoneModals
 		}
 	}
 
-	apple.sendNotificationToBarkApp(messages)
+	messages := make([]*Message, 0, 10)
+	for pickupStore, iphoneModels := range pickupQuote2IphoneModels {
+		if apple.configOption.NotifyMergedByStore {
+			messages = append(messages, &Message{
+				Title:   pickupStore,
+				Content: strings.Join(iphoneModels, ","),
+			})
+			continue
+		}
+
+		for _, iphoneModel := range iphoneModels {
+			messages = append(messages, &Message{
+				Title:   iphoneModel,
+				Content: pickupStore,
+			})
+		}
+	}
+
+	apple.sendNotificationToBarkApp(messages...)
+	return nil
 }
 
-func (apple *Apple) sendNotificationToBarkApp(messages []*Message) {
+func (apple *Apple) sendNotificationToBarkApp(messages ...*Message) {
+
 	for _, msg := range messages {
+
 		for _, notifyUrl := range apple.configOption.NotifyUrl {
 			url := fmt.Sprintf("%v/%v/%v", notifyUrl, msg.Title, msg.Content)
 			_, err := apple.cli.Get(url)
@@ -136,12 +167,21 @@ func (apple *Apple) unMarshalResp(resp *http.Response) (*SearchResponse, error) 
 	return searchResponse, nil
 }
 
-func (apple *Apple) makeUrl() string {
+func (apple *Apple) makeUrl() (string, error) {
 	values := make(url.Values)
-	values.Add("mt", "regular")
-	values.Add("little", "false")
-	values.Add("pl", "true")
-	values.Add("location", apple.configOption.Location)
+
+	state, city, district, err := apple.configOption.Location.GetParts()
+	if err != nil {
+		return "", err
+	}
+	values.Add("state", state)
+	values.Add("city", city)
+	values.Add("district", district)
+	values.Add("geoLocated", "true")
+
+	// values.Add("mt", "regular")
+	// values.Add("little", "false")
+	// values.Add("pl", "true")
 
 	for i, modal := range apple.configOption.Modals {
 		key := fmt.Sprintf("parts.%d", i)
@@ -149,5 +189,5 @@ func (apple *Apple) makeUrl() string {
 	}
 
 	query := values.Encode()
-	return fmt.Sprintf("%v?%v", SearchUrl, query)
+	return fmt.Sprintf("%v?%v", SearchUrl, query), nil
 }
