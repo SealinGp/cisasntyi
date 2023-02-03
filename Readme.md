@@ -23,3 +23,6 @@ scp ./cisasntyi.tar.gz user@yourPrivateServerIp:/home
 ssh -t user@ip cd /home
 tar -xvzf cisasntyi.tar.gz && cd cisasntyi && bash start.sh
 ```
+
+### screen shot
+![alt 属性文本](./example.jpeg)
