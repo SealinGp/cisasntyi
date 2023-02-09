@@ -1,4 +1,4 @@
-## for buy iphone 13 notification
+## iphone stock notification
 
 cisasntyi: check iphone stock and send notification to your iphone
 
