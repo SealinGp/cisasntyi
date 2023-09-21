@@ -1,23 +1,23 @@
 #/bin/bash
-echo "开始构建..."
+echo "Start Building..."
 go build .
 if [ $? -ne 0 ] ; then
-  echo "构建失败,请检查您的go环境是否正常"
+  echo "Buid failed, please check error message"
   exit
 fi
-echo "构建成功,准备运行..."
+echo "Build success,starting..."
 
 
 if [ ! -f "app_dev.yml" ] ; then
-  echo "检查到您是首次运行,开始生成配置文件..."
+  echo "Generate Config Files..."
   cp app.yml app_dev.yml  
 
   if [ $? -ne 0 ] ; then 
-    echo "生成配置文件失败."
+    echo "Faile to generate config file."
     exit
   fi
 
-  echo "生成配置app_dev.yml文件成功,请修改该文件配置后重新运行"
+  echo "app_dev.yml is created, please midify this config for dev testing"
   exit
 fi
 

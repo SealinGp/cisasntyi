@@ -51,11 +51,11 @@ func (apple *Apple) Serve() {
 	}
 }
 func (apple *Apple) ReqSearch() error {
-	log.Printf("[I] 开始查询苹果接口. 查询位置:%v", apple.configOption.StoreNumber)
+	log.Printf("[I] Start checking apple stock. Store Number:%v", apple.configOption.StoreNumber)
 	
 	appleUrl, err := apple.makeUrl()
 
-	log.Printf("[I] 开始查询 url:%v", appleUrl)
+	log.Printf("[I] Looking up url:%v", appleUrl)
 
 	if err != nil {
 		log.Printf("[E] make url failed. err:%v", err)
