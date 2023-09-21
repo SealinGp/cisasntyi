@@ -10,7 +10,7 @@ modals: ["MU673LL/A"]
 
 
 #推送url 需要下载Bark app 在ios可得到 https://api.day.app/xxx
-notifyUrl: ["https://api.day.app/iX4i5VT9xDeQGrPkMXmghL"]
+notifyUrl: ["https://api.day.app/xxx"]
 
 #消息是否根据取货地点合并通知
 notifyMergedByStore: false
