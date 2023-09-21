@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	SearchUrl = "https://www.apple.com.cn/shop/fulfillment-messages"
+	SearchUrl = "https://www.apple.com/shop/fulfillment-messages"
 )
 
 type Apple struct {
@@ -51,8 +51,12 @@ func (apple *Apple) Serve() {
 	}
 }
 func (apple *Apple) ReqSearch() error {
-	log.Printf("[I] 开始查询苹果接口. 查询位置:%v", apple.configOption.Location)
+	log.Printf("[I] 开始查询苹果接口. 查询位置:%v", apple.configOption.StoreNumber)
+	
 	appleUrl, err := apple.makeUrl()
+
+	log.Printf("[I] 开始查询 url:%v", appleUrl)
+
 	if err != nil {
 		log.Printf("[E] make url failed. err:%v", err)
 		return err
@@ -87,6 +91,7 @@ func (apple *Apple) ReqSearch() error {
 		for _, info := range store.PartsAvailability {
 			msgTypes := info.MessageTypes
 			pickupQuote := info.PickupSearchQuote
+			storePickEligible := info.StorePickEligible
 			pickStore := store.StoreName
 			iphoneModal := msgTypes.Expanded.StorePickupProductTitle
 			if iphoneModal == "" {
@@ -94,7 +99,7 @@ func (apple *Apple) ReqSearch() error {
 			}
 
 			log.Printf("[I] 型号:%+v 地点:%v %v", iphoneModal, pickStore, pickupQuote)
-			if !apple.hasStockOffline(info.PickupSearchQuote) {
+			if !storePickEligible || !apple.hasStockOffline(info.PickupSearchQuote) {
 				continue
 			}
 
@@ -146,7 +151,7 @@ func (apple *Apple) sendNotificationToBarkApp(messages ...*Message) {
 }
 
 func (apple *Apple) hasStockOffline(s string) bool {
-	return strings.Contains(s, "可取货") && !strings.Contains(s, "不")
+	return strings.Contains(s, "Available") && !strings.Contains(s, "Unavailable")
 }
 
 func (apple *Apple) unMarshalResp(resp *http.Response) (*SearchResponse, error) {
@@ -170,18 +175,9 @@ func (apple *Apple) unMarshalResp(resp *http.Response) (*SearchResponse, error) 
 func (apple *Apple) makeUrl() (string, error) {
 	values := make(url.Values)
 
-	state, city, district, err := apple.configOption.Location.GetParts()
-	if err != nil {
-		return "", err
-	}
-	values.Add("state", state)
-	values.Add("city", city)
-	values.Add("district", district)
+	values.Add("store", apple.configOption.StoreNumber)
 	values.Add("geoLocated", "true")
-
-	// values.Add("mt", "regular")
-	// values.Add("little", "false")
-	// values.Add("pl", "true")
+	values.Add("searchNearby", "true")
 
 	for i, modal := range apple.configOption.Modals {
 		key := fmt.Sprintf("parts.%d", i)

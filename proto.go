@@ -30,6 +30,7 @@ type ConfigOption struct {
 	NotifyUrl           []string `yaml:"notifyUrl"`
 	Location            Location `yaml:"location"`
 	SearchInterval      int      `yaml:"searchInterval"`
+	StoreNumber			string 	`yaml:"storeNumber"`
 	NotifyMergedByStore bool     `yaml:"notifyMergedByStore"`
 }
 
@@ -64,6 +65,7 @@ type PartsAvailability map[string]PartsAvailabilityValue //型号 => info
 
 type PartsAvailabilityValue struct {
 	PickupSearchQuote string        `json:"pickupSearchQuote"` //可取货
+	StorePickEligible bool 			`json:"StorePickEligible"`
 	MessageTypes      *MessageTypes `json:"messageTypes"`
 }
 
